@@ -41,8 +41,8 @@ jobs:
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
         with:
-          aws_access_key: AKIAUBZDGREZ2Q6SGF6W
-          aws_secret_key: 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
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: in2l_cicd_beanstack_test
           environment_name: In2lcicdbeanstacktest-env
           version_label: 12345
