@@ -3,13 +3,13 @@ package com.in2.repository;
 import com.in2.domain.Member;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.EntityManager;
+//import javax.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
-  private final EntityManager entityManager;
+//  private final EntityManager entityManager;
 
   @Override
   public List<Member> selectAll(){
