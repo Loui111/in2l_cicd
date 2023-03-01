@@ -7,11 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    run: mkdir -p server-app
     env:
       working-directory: server-app
 
     steps: # 작업 단계
+      - name: mkdir
+        run: mkdir -p server-app
+
       - name: Checkout source code # 단계별 이름, 구분자로 소스를 가져옴
         uses: actions/checkout@v2
 
