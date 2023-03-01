@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      working-directory: ./server-app
+      working-directory: server-app
 
     steps: # 작업 단계
       - name: Checkout source code # 단계별 이름, 구분자로 소스를 가져옴
