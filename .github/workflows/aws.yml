@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      working-directory: ./server-app
 
     steps: # 작업 단계
       - name: Checkout source code # 단계별 이름, 구분자로 소스를 가져옴
@@ -18,16 +20,13 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
-      - name: mkdir server-app
-        run: mkdir -p server-app
-
       - name: Grant execute permission for gradlew
-        working-directory: /server-app
+        working-directory: ${{ env.working-directory }}
         run: chmod +x ./gradlew
         shell: bash
 
       - name: Build with Gradle
-        working-directory: /server-app
+        working-directory: ${{ env.working-directory }}
         run: ./gradlew clean build
         shell: bash
 
