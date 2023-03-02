@@ -5,6 +5,11 @@ name: logging-system
 on:
   workflow_dispatch:
 
+env: # 새로 추가한 부분
+  S3_BUCKET_NAME: logging-system-deploy
+  PROJECT_NAME: playground-logging
+
+
 jobs:
   build:
     runs-on: ubuntu-latest

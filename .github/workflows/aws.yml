@@ -1,8 +1,9 @@
 name: Deploy from Gitaction to AWS Elastic Beanstack
 on:
-#  push:
-#    branches:
-#      - main
+  #  push:
+  #    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
