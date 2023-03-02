@@ -7,6 +7,7 @@ import com.in2.repository.MemberGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
 //  private final MemberRepository memberRepository;
+
+  @GetMapping("/")
+  public String version() { //걍 healthcheck. 별 의미 없음.
+    return String.format("Project Version : %s", "0.0.3");
+  }
 
   @GetMapping("/memberAll")
   List<Member> getAllMember() {

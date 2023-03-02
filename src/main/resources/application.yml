@@ -23,6 +23,9 @@ logging:
             sql:
               BasicBinder: TRACE
 
+logging-module:
+  version: 0.0.1
+
 #  jpa:
 #    open-in-view: true
 #    hibernate:
