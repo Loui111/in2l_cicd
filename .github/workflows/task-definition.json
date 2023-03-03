@@ -78,8 +78,8 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "512",
-    "memory": "1024",
+    "cpu": "1024",
+    "memory": "512",
     "registeredAt": "2023-03-03T18:14:52.804000+09:00",
     "registeredBy": "arn:aws:iam::278709831987:user/devops_user"
 }

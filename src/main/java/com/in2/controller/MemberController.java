@@ -20,7 +20,7 @@ public class MemberController {
 
   @GetMapping("/")
   public String version() { //걍 healthcheck. 별 의미 없음.
-    return String.format("Project Version : %s", "0.0.3");
+    return String.format("Project Version : %s", "0.0.5");
   }
 
   @GetMapping("/memberAll")
