@@ -1,97 +1,94 @@
-name: Deploy from Gitaction to AWS Elastic Beanstack
+# This workflow will build and push a new container image to Amazon ECR,
+# and then will deploy a new task definition to Amazon ECS, when there is a push to the "main" branch.
+#
+# To use this workflow, you will need to complete the following set-up steps:
+#
+# 1. Create an ECR repository to store your images.
+#    For example: `aws ecr create-repository --repository-name my-ecr-repo --region us-east-2`.
+#    Replace the value of the `ECR_REPOSITORY` environment variable in the workflow below with your repository's name.
+#    Replace the value of the `AWS_REGION` environment variable in the workflow below with your repository's region.
+#
+# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
+#    For example, follow the Getting Started guide on the ECS console:
+#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
+#    Replace the value of the `ECS_SERVICE` environment variable in the workflow below with the name you set for the Amazon ECS service.
+#    Replace the value of the `ECS_CLUSTER` environment variable in the workflow below with the name you set for the cluster.
+#
+# 3. Store your ECS task definition as a JSON file in your repository.
+#    The format should follow the output of `aws ecs register-task-definition --generate-cli-skeleton`.
+#    Replace the value of the `ECS_TASK_DEFINITION` environment variable in the workflow below with the path to the JSON file.
+#    Replace the value of the `CONTAINER_NAME` environment variable in the workflow below with the name of the container
+#    in the `containerDefinitions` section of the task definition.
+#
+# 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
+#    and best practices on handling the access key credentials.
+
+name: Deploy to Amazon ECS CICD test
+
 on:
-  #  push:
-  #    branches: [ "main" ]
-  pull_request:
+  push:
     branches: [ "main" ]
 
+env:
+  AWS_REGION: ap-northeast-2                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: cicd_private_test           # set this to your Amazon ECR repository name
+  ECS_SERVICE: cicd_ecs_serviceName                 # set this to your Amazon ECS service name
+  ECS_CLUSTER: cluster_name_ecs_test                 # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION: .github/workflows/task-definition.json # set this to the path to your Amazon ECS task definition
+  # file, e.g. .aws/task-definition.json
+  CONTAINER_NAME: ecrimage           # set this to the name of the container in the
+  # containerDefinitions section of your task definition
+
+permissions:
+  contents: read
+
 jobs:
-  build:
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    env:
-      working-directory: /home/runner/work/in2l_cicd/in2l_cicd/server-app
+    environment: production
 
-    steps: # 작업 단계
-      - name: mkdir
-        run: mkdir -p /home/runner/work/in2l_cicd/in2l_cicd/server-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Checkout source code # 단계별 이름, 구분자로 소스를 가져옴
-        uses: actions/checkout@v2
-
-      - name: Set up JDK 17 # JDK 설치
-        uses: actions/setup-java@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          java-version: '17'
-          distribution: 'corretto'
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Grant execute permission for gradlew
-        working-directory: ${{ env.working-directory }}
-        run: chmod +x ./gradlew
-        shell: bash
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build with Gradle
-        working-directory: ${{ env.working-directory }}
-        run: ./gradlew clean build
-        shell: bash
-
-      - name: Get current time
-        uses: 1466587594/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYYMMDDTHHmm
-          utcOffset: "+09:00"
-
-      - name: Generate deployment package
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          mkdir -p deploy
-          cp server-app/build/libs/server-app.jar deploy/todo-application-prod-ebextensions-1.jar
-          cp Procfile deploy/Procfile
-          cp -r .ebextensions deploy/.ebextensions
-          cd deploy && zip -r todo-application-prod-label-${{steps.current-time.outputs.formattedTime}}-${{github.sha}} .
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Deploy Consumer to EB
-        uses: einaregilsson/beanstalk-deploy@v14
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: in2l_cicd_beanstack_test
-          environment_name: In2lcicdbeanstacktest-env
-          version_label: in2l_cicd_beanstack-label-${{steps.current-time.outputs.formattedTime}}-${{github.sha}}
-          region: ap-northeast-2
-          deployment_package: deploy/in2l_cicd_beanstack-label-${{steps.current-time.outputs.formattedTime}}-${{github.sha}}.zip
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
 
-#    steps:
-#      - name: Checkout source code
-#        uses: actions/checkout@v2
-
-#      - uses: actions/checkout@v3
-#      - name: Set up JDK 17
-#        uses: actions/setup-java@v3
-#        with:
-#          java-version: '17'
-#          distribution: 'corretto'
-#      - name: Build with Gradle
-#        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-#        with:
-#          arguments: build
-#
-#      - name: Generate deployment package
-#        run: zip -r deploy.zip . -x '*.git*'
-#
-#      - name: Get current time
-#        uses: 1466587594/get-current-time@v2
-#        id: current-time
-#        with:
-#          format: YYYYMMDDTHHmm
-#          utcOffset: "+09:00"
-#
-#      - name: Deploy to EB
-#        uses: einaregilsson/beanstalk-deploy@v21
-#        with:
-#          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          application_name: in2l_cicd_beanstack_test
-#          environment_name: In2lcicdbeanstacktest-env
-#          version_label: 1234567890
-#          region: ap-northeast-2
-#          deployment_package: deploy.zip
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
