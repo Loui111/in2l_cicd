@@ -14,6 +14,10 @@ configurations {
 	}
 }
 
+jar {					// no xxxx-plain.jar
+	enabled = false		//-plain.jar는 의존성 관련 내용이 포함되어 있지 않고 모듈의 클래스와 리소스만 포함하는 파일
+}
+
 repositories {
 	mavenCentral()
 	maven { url 'https://repo.spring.io/milestone' }
