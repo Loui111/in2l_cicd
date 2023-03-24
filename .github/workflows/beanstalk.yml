@@ -52,7 +52,8 @@ jobs:
         env:
           ECR_REGISTRY: 278709831987.dkr.ecr.ap-northeast-2.amazonaws.com
           ECR_REPOSITORY: cicd_private_test
-          IMAGE_TAG: ${{ env.date }}
+          IMAGE_TAG: $GITHUB_SHA
+#           IMAGE_TAG: ${{ env.date }}
         run: |
           docker buildx build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
