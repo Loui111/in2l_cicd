@@ -56,7 +56,7 @@ jobs:
 #           IMAGE_TAG: $GITHUB_SHA
 #           IMAGE_TAG: ${{ env.date }}
         run: |
-          mv ./build/libsin2l-0.0.1-SNAPSHOT-plain.jar ./
+          mv ./build/libs/in2l-0.0.1-SNAPSHOT-plain.jar ./
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
