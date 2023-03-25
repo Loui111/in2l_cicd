@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
 
 //  private final MemberRepository memberRepository;
@@ -33,6 +35,8 @@ public class MemberController {
     memberArrayList.add(memberGenerator.getMember1());
     memberArrayList.add(memberGenerator.getMember2());
     memberArrayList.add(memberGenerator.getMember3());
+
+    log.info("/memberAll:: "+memberArrayList.toString());
     
     return memberArrayList;
   }
@@ -42,7 +46,10 @@ public class MemberController {
     MemberDto memberDto = new MemberDto();
     Member member = selectOne(id);
 
-    return memberDto.of(member);
+    MemberDto memberDto1 = memberDto.of(member);
+    log.info("/member:: "+memberDto1.toString());
+
+    return memberDto1;
   }
 
   //TODO: mysql이 연결되면 없어져야함. 그냥 더미서버.
