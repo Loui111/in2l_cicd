@@ -1,6 +1,13 @@
 name: Upload Docker Image to ECR & Pull Image to Beanstalk
 
 on:
+  workflow_dispatch:
+    inputs: 
+      name: 
+        description: 'Backend Project Name'
+        default: 'input project name'
+        required: true
+        
   push:
     branches: [ "main" ]
 
