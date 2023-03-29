@@ -1,7 +1,7 @@
 FROM amazoncorretto:17-alpine3.17-jdk
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} app.jar
-EXPOSE 80
+EXPOSE 5000
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 # FROM amazoncorretto:17-alpine3.17-jdk
