@@ -22,7 +22,7 @@ public class MemberController {
 
   @GetMapping("/")
   public String version() { //걍 healthcheck. 별 의미 없음.
-    return String.format("Project Version : %s", "0.0.5");
+    return String.format("Project Version : %s", "0.0.6");
   }
 
   @GetMapping("/memberAll")
